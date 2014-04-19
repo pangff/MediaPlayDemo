@@ -88,6 +88,7 @@ public class MainActivity extends Activity implements PlayStateListener{
   
   @Override
   protected void onDestroy() {
+    Log.e("dd","销毁");
     PlayUtils.getInstance().releasPlayer();
     super.onDestroy();
   }
@@ -95,7 +96,7 @@ public class MainActivity extends Activity implements PlayStateListener{
 
   @Override
   public void onProgress(ISoundBean soundBean, int progress) {
-    Log.e("dddd", "播放"+(progress/1000)+"s");
+    //Log.e("dddd", "播放"+(progress/1000)+"s");
     state.setText("播放"+(progress/1000)+"s");
   }
 

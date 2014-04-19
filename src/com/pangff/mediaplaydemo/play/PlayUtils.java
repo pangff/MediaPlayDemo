@@ -288,7 +288,7 @@ public class PlayUtils {
             VoiceProgressChangedEvent event = new VoiceProgressChangedEvent();
             event.voiceId = getCurrentId();
             event.progess = -1;
-            event.state = PlaySate.STATE_PLAY_OVER;
+            event.state = PlaySate.STATE_DOWNLOAD_FINISHED;
             event.playing = false;
             event.soundBean = sound;
             voicePlayUtil.voiceChangedPublisher.notifyDataChanged(event);
@@ -321,6 +321,9 @@ public class PlayUtils {
     }
 
     // 其他项在playing
+    if(voicePlayUtil.mediaPlay==null){
+      voicePlayUtil.createMediaPlayer();
+    }
     if (voicePlayUtil.mediaPlay.isPlaying()) {
       voicePlayUtil.voiceId = null;
       voicePlayUtil.task.stop();
