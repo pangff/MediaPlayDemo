@@ -87,8 +87,8 @@ public class MainActivity extends Activity implements PlayStateListener{
 
   @Override
   public void onProgress(ISoundBean soundBean, int progress) {
-    Log.e("dddd", "播放百分之"+(progress/1000)+"s");
-    state.setText("播放百分之"+(progress/1000)+"s");
+    Log.e("dddd", "播放"+(progress/1000)+"s");
+    state.setText("播放"+(progress/1000)+"s");
   }
 
 }
