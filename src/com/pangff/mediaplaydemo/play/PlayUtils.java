@@ -138,7 +138,7 @@ public class PlayUtils {
       }
     }else{
       //发通知播放完毕
-      if(playStateListener!=null){
+      if(playStateListener!=null && soundBeanList.size()>0){
         playStateListener.onFinishAllPlay();
       }
       voicePlayUtil.release();
