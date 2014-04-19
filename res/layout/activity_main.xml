@@ -13,5 +13,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/hello_world" />
+    
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="myOnClick"
+        android:layout_centerInParent="true"
+        android:text="模拟点击播放指定" />
 
 </RelativeLayout>

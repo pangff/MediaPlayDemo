@@ -1,12 +1,12 @@
 package com.pangff.mediaplaydemo.play;
 
 import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
-import android.util.Log;
 
 import com.pangff.mediaplaydemo.play.IPlayVoiceProgressListener.VoiceProgressChangedEvent;
 
 public class VoicePlayUtil {
+  
+  
 
   public VoicePlayUtil() {
   }
@@ -15,9 +15,9 @@ public class VoicePlayUtil {
   // 每次延迟100毫秒再启动线程
   public String voiceId;
   // 音频相关
-  private MediaPlayer mediaPlay = new MediaPlayer();
+  public MediaPlayer mediaPlay = new MediaPlayer();
 
-  public MediaPlayer getMediaPlayer() {
+  public MediaPlayer createMediaPlayer() {
     if (mediaPlay == null) {
       mediaPlay = new MediaPlayer();
     }
@@ -25,18 +25,19 @@ public class VoicePlayUtil {
   }
 
   public void release() {
-    VoiceProgressChangedEvent event = new VoiceProgressChangedEvent();
-    event.voiceId = voiceId;
-    event.playing = false;
-    event.progess = 0;
-    voiceChangedPublisher.notifyDataChanged(event);
-    getMediaPlayer().stop();
-    mediaPlay.release();
-    mediaPlay = null;
+      VoiceProgressChangedEvent event = new VoiceProgressChangedEvent();
+      event.voiceId = voiceId;
+      event.playing = false;
+      event.progess = 0;
+      event.state = PlaySate.STATE_PLAY_RELEASE;
+      voiceChangedPublisher.notifyDataChanged(event);
+    if(mediaPlay!=null){
+      mediaPlay.stop();
+      mediaPlay.release();
+      mediaPlay = null;
+    }
     task.stop();
     voiceId = null;
-    
-    
   }
 
   public EventPublish<IPlayVoiceProgressListener, VoiceProgressChangedEvent> voiceChangedPublisher =
@@ -56,11 +57,13 @@ public class VoicePlayUtil {
 
       VoiceProgressChangedEvent event = new VoiceProgressChangedEvent();
       event.voiceId = voiceId;
-      if (getMediaPlayer().isPlaying()) {
+      if (mediaPlay.isPlaying()) {
+        event.state = PlaySate.STATE_PLAY_ON;
         event.playing = true;
         event.progess = mediaPlay.getCurrentPosition();
         //Log.e("ddd", "event.progess:"+event.progess);
       } else {
+        event.state = PlaySate.STATE_PLAY_OVER;
         event.playing = false;
         event.progess = 0;
         count++;

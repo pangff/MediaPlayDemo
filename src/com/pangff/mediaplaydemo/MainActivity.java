@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
 import android.widget.TextView;
 
 import com.pangff.mediaplaydemo.play.ISoundBean;
@@ -16,13 +17,15 @@ import com.pangff.mediaplaydemo.play.PlayUtils;
 public class MainActivity extends Activity implements PlayStateListener{
 
   private TextView state;
+  List<SoundBean> dataList = new ArrayList<SoundBean>();
+  
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     
     state = (TextView) findViewById(R.id.state);
-    List<SoundBean> dataList = new ArrayList<SoundBean>();
+   
     PlayUtils.getInstance().setPlayStateListener(this);
     for(int i=0;i<2;i++){
       SoundBean soundBean = new SoundBean();
@@ -34,6 +37,11 @@ public class MainActivity extends Activity implements PlayStateListener{
       dataList.add(soundBean);
       PlayUtils.getInstance().addSound(soundBean);
     }
+  }
+  
+  public void myOnClick(View view){
+    //模拟清空直接播放指定文件
+    PlayUtils.getInstance().playSelectedSound(dataList.get(1));
   }
 
 

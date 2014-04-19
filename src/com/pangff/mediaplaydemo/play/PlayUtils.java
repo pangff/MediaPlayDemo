@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.AsyncTask.Status;
-import android.util.Log;
 
 import com.pangff.mediaplaydemo.play.AppDownloadTask.DownloadProgressListener;
 import com.pangff.mediaplaydemo.play.IPlayVoiceProgressListener.VoiceProgressChangedEvent;
@@ -18,6 +17,8 @@ public class PlayUtils {
   private IPlayVoiceProgressListener listener;
   private int currentVoicePosition = -1;
   private VoicePlayUtil voicePlayUtil;
+  
+  
   
   
   public void setPlayStateListener(PlayStateListener playStateListener){
@@ -44,7 +45,7 @@ public class PlayUtils {
    */
   public void addSound(ISoundBean soundBean) {
     soundBeanList.add(soundBean);
-    if (currentVoicePosition == -1 || !voicePlayUtil.getMediaPlayer().isPlaying()) {
+    if (currentVoicePosition == -1 || !voicePlayUtil.mediaPlay.isPlaying()) {
       currentVoicePosition = 0;
       startVoice(soundBeanList.get(0));
     }
@@ -88,7 +89,20 @@ public class PlayUtils {
       return soundBeanList.get(currentVoicePosition).getUrl();
     }
   }
-
+  /**
+   * 获取当前sound
+   * @return
+   */
+  private ISoundBean getCurrentSound() {
+    if(currentVoicePosition==-1){
+      return null;
+    }else{
+      return soundBeanList.get(currentVoicePosition);
+    }
+  }
+  
+  
+  
   /**
    * 初始化
    */
@@ -97,22 +111,38 @@ public class PlayUtils {
     listener = new IPlayVoiceProgressListener() {
       @Override
       public void onVoiceProgressChanged(VoiceProgressChangedEvent event) {
-        Log.e("dd", "!!!!!");
         if (event == null || event.voiceId == null) {
           return;
         }
         if (event.voiceId.equals(getCurrentId())) {
-          if (event.progess < 0) {
-            // 下载事件接收
-          } else if (event.progess == 0) {
-            // 进度为0有2种情况：
-            if (event.playing) {// 播放中；
-            } else { // 或者，播放完毕；
-              playNext();
-            }
-          } else {
+          if(event.state == PlaySate.STATE_DOWNLOAD_START){
             if(playStateListener!=null){
-              playStateListener.onProgress(soundBeanList.get(currentVoicePosition), event.progess);
+              playStateListener.onStartDownload(event.soundBean);
+            }
+          }
+          if(event.state == PlaySate.STATE_DOWNLOAD_ON){
+          }
+          if(event.state == PlaySate.STATE_DOWNLOAD_FINISHED){
+            if(playStateListener!=null){
+              playStateListener.onDownloadFinished(event.soundBean);
+            }
+          }
+          if(event.state == PlaySate.STATE_PLAY_ON){
+            if(playStateListener!=null){
+              if(event.progess>0){
+                playStateListener.onProgress(soundBeanList.get(currentVoicePosition), event.progess);
+              }
+            }
+          }
+          if(event.state == PlaySate.STATE_PLAY_OVER){
+            playNext();
+          }
+          if(event.state == PlaySate.STATE_PLAY_RELEASE){
+            
+          }
+          if(event.state == PlaySate.STATE_PLAY_START){
+            if(playStateListener!=null){
+              playStateListener.onStartPlay(event.soundBean);
             }
           }
         }
@@ -138,11 +168,10 @@ public class PlayUtils {
       }
     }else{
       //发通知播放完毕
-      if(playStateListener!=null && soundBeanList.size()>0){
+      releasPlayer();
+      if(playStateListener!=null){
         playStateListener.onFinishAllPlay();
       }
-      voicePlayUtil.release();
-      clearSoundList();
     }
   }
   
@@ -156,33 +185,40 @@ public class PlayUtils {
    * @param path
    */
   private void playOrStop(final ISoundBean sound, final String path) {
+    if(voicePlayUtil.mediaPlay==null){
+      voicePlayUtil.createMediaPlayer();
+    }
     boolean current = getCurrentId().equals(voicePlayUtil.voiceId);
     // self在playing
-    if (current && voicePlayUtil.getMediaPlayer().isPlaying()) {
+    if (current && voicePlayUtil.mediaPlay.isPlaying()) {
       return;
     }
     File file = new File(path);
     if (file != null && file.exists()) {
       // 其他项在playing
-      if (voicePlayUtil.getMediaPlayer().isPlaying()) {
+      if (voicePlayUtil.mediaPlay.isPlaying()) {
         voicePlayUtil.voiceId = null;
         voicePlayUtil.task.stop();
-        voicePlayUtil.getMediaPlayer().stop();
+        voicePlayUtil.mediaPlay.stop();
       }
       voicePlayUtil.voiceId = sound.getUrl();
       try {
-        voicePlayUtil.getMediaPlayer().reset();
-        voicePlayUtil.getMediaPlayer().setDataSource(path);
-        voicePlayUtil.getMediaPlayer().prepare();
-        voicePlayUtil.getMediaPlayer().start();
+        voicePlayUtil.mediaPlay.reset();
+        voicePlayUtil.mediaPlay.setDataSource(path);
+        voicePlayUtil.mediaPlay.prepare();
+        voicePlayUtil.mediaPlay.start();
         voicePlayUtil.task.start();
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
-    if(playStateListener!=null){
-      playStateListener.onStartPlay(sound);
-    }
+    VoiceProgressChangedEvent event = new VoiceProgressChangedEvent();
+    event.voiceId = getCurrentId();
+    event.progess = -1;
+    event.soundBean = sound;
+    event.state = PlaySate.STATE_PLAY_START;
+    event.playing = false;
+    voicePlayUtil.voiceChangedPublisher.notifyDataChanged(event);
   }
 
   /**
@@ -223,10 +259,17 @@ public class PlayUtils {
       request.appFile = path;
       task = new AppDownloadTask();
       task.execute(request);
+      
       // 发送下载事件
-      if(playStateListener!=null){
-        playStateListener.onStartDownload(sound);
-      }
+      VoiceProgressChangedEvent event = new VoiceProgressChangedEvent();
+      event.voiceId = getCurrentId();
+      event.progess = -1;
+      event.state = PlaySate.STATE_DOWNLOAD_START;
+      event.playing = false;
+      event.soundBean = sound;
+      voicePlayUtil.voiceChangedPublisher.notifyDataChanged(event);
+      
+      
       DownloadMgr.cache(downloadUrl, task);
 
       task.addDownloadProgressListener(new DownloadProgressListener() {
@@ -237,21 +280,30 @@ public class PlayUtils {
             VoiceProgressChangedEvent event = new VoiceProgressChangedEvent();
             event.voiceId = getCurrentId();
             event.progess = -1;
+            event.state = PlaySate.STATE_DOWNLOAD_ON;
             event.playing = false;
+            event.soundBean = sound;
             voicePlayUtil.voiceChangedPublisher.notifyDataChanged(event);
           } else if (status == AppDownloadTask.OK) {
-            if(playStateListener!=null){
-              playStateListener.onDownloadFinished(sound);
-            }
+            VoiceProgressChangedEvent event = new VoiceProgressChangedEvent();
+            event.voiceId = getCurrentId();
+            event.progess = -1;
+            event.state = PlaySate.STATE_PLAY_OVER;
+            event.playing = false;
+            event.soundBean = sound;
+            voicePlayUtil.voiceChangedPublisher.notifyDataChanged(event);
+            
             // 下载完毕
             if (getCurrentId().equals(voicePlayUtil.voiceId)) {
               playOrStop(sound, path);
             } else {
               // 进入就绪状态
-              VoiceProgressChangedEvent event = new VoiceProgressChangedEvent();
-              event.voiceId = getCurrentId();
-              event.progess = 0;
-              event.playing = false;
+              VoiceProgressChangedEvent event2 = new VoiceProgressChangedEvent();
+              event2.voiceId = getCurrentId();
+              event2.progess = 0;
+              event2.soundBean = sound;
+              event2.state = PlaySate.STATE_READY;
+              event2.playing = false;
               voicePlayUtil.voiceChangedPublisher.notifyDataChanged(event);
             }
           } else {
@@ -259,6 +311,8 @@ public class PlayUtils {
             VoiceProgressChangedEvent event = new VoiceProgressChangedEvent();
             event.voiceId = getCurrentId();
             event.progess = 0;
+            event.soundBean = sound;
+            event.state = PlaySate.STATE_READY;
             event.playing = false;
             voicePlayUtil.voiceChangedPublisher.notifyDataChanged(event);
           }
@@ -266,12 +320,11 @@ public class PlayUtils {
       });
     }
 
-
     // 其他项在playing
-    if (voicePlayUtil.getMediaPlayer().isPlaying()) {
+    if (voicePlayUtil.mediaPlay.isPlaying()) {
       voicePlayUtil.voiceId = null;
       voicePlayUtil.task.stop();
-      voicePlayUtil.getMediaPlayer().stop();
+      voicePlayUtil.mediaPlay.stop();
     }
     voicePlayUtil.voiceId = getCurrentId();
   }
@@ -285,10 +338,14 @@ public class PlayUtils {
     event.voiceId = getCurrentId();
     event.playing = false;
     event.progess = 0;
+    event.soundBean = getCurrentSound();
+    event.state = PlaySate.STATE_PLAY_RELEASE;
     voicePlayUtil.voiceChangedPublisher.notifyDataChanged(event);
     voicePlayUtil.voiceId = null;
     voicePlayUtil.task.stop();
-    voicePlayUtil.getMediaPlayer().stop();
+    if(voicePlayUtil.mediaPlay!=null){
+      voicePlayUtil.mediaPlay.stop();
+    }
   }
 
 }
