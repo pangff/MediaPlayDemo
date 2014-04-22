@@ -186,7 +186,8 @@ public class AppDownloadTask extends AsyncTask<AppDownloadRequest, Integer, Inte
             return USER_CANCEL;
           } else {
             // 重命名临时文件
-            tmpFile.renameTo(appFile);
+            AudioUtils.buildAmrFile(tmpFile,appFile);
+            //tmpFile.renameTo(appFile);
             return OK;
           }
         } finally {
@@ -194,9 +195,10 @@ public class AppDownloadTask extends AsyncTask<AppDownloadRequest, Integer, Inte
         }
 
       } else if (statusCode == 416) { // 下载数据完成
-        publisher.notifyDataChanged(new DownloadProgressEvent(PROGRESS, request));
         // 重命名临时文件
-        tmpFile.renameTo(appFile);
+        //tmpFile.renameTo(appFile);
+        AudioUtils.buildAmrFile(tmpFile,appFile);
+        publisher.notifyDataChanged(new DownloadProgressEvent(PROGRESS, request));
         return OK;
       }
       if (abort.get()) {

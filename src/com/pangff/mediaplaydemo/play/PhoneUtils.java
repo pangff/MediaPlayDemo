@@ -42,6 +42,16 @@ public class PhoneUtils {
   }
   
   /**
+   * 得到sd卡的路径,前缀音频
+   * @return
+   */
+  public static String getVoicePrefixOnSDPath(String voiceName) {
+    createDir(getSDPath() + "/callme");
+    createDir(getSDPath() + "/callme/voices_prefix");
+    return getSDPath() + "/callme/voices_prefix/"+voiceName;
+  }
+  
+  /**
    * 创建路径
    * @param path
    */

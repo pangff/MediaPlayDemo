@@ -3,11 +3,16 @@ package com.pangff.mediaplaydemo.play;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import android.util.Log;
+
+import com.pangff.mediaplaydemo.BaseApplication;
+import com.pangff.mediaplaydemo.R;
 
 /**
  * 语音工具类
@@ -16,12 +21,12 @@ import android.util.Log;
  * @version 1.0
  */
 public class AudioUtils {
-  
+
   public final static int MSG_AMRFILECOMPLETE = 1;
   public final static int MSG_AMRFILECANCEL = -1;
   public final static int MSG_SHOW_RECORDPLAY = 2;
-  
-  public final static String RECORD_SAVE_PATH = PhoneUtils.getSDPath() + "/pangff/record/";
+
+  public final static String RECORD_SAVE_PATH = PhoneUtils.getSDPath() + "/callme/record/";
   private final static String TAG = AudioUtils.class.getSimpleName();
 
   public static void skipAmrHead(DataInputStream dataInput) {
@@ -53,14 +58,54 @@ public class AudioUtils {
   }
 
   /**
+   * 音频前缀写入sdcard
+   * @param path
+   */
+  public static boolean writeVoicePrefixToSdcard(String path) {
+    InputStream in = BaseApplication.self.getResources().openRawResource(R.raw.send);
+    FileOutputStream out = null;
+    try {
+      out = new FileOutputStream(path);
+      byte[] buff = new byte[1024];
+      int read = 0;
+      while ((read = in.read(buff)) > 0) {
+        out.write(buff, 0, read);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    } finally {
+      try {
+        in.close();
+        out.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+    return true;
+  }
+
+  /**
    * 合并AMR文件
    * 
    * @param tempAmrFiles
    * @return
    */
-  public static File buildAmrFile(List<File> tempAmrFiles) {
+  public static File buildAmrFile(File tempFile, File amrFile) {
+    List<File> tempAmrFiles = new ArrayList<File>();
+    
+    File prefixVoice = new File(PhoneUtils.getVoicePrefixOnSDPath("send.arm"));
+    if(prefixVoice.exists()){
+      tempAmrFiles.add(prefixVoice);
+    }else{
+      if(writeVoicePrefixToSdcard(PhoneUtils.getVoicePrefixOnSDPath("send.arm"))){
+        tempAmrFiles.add(prefixVoice);
+      }
+    }
+    tempAmrFiles.add(tempFile);
+
     if (tempAmrFiles == null || tempAmrFiles.isEmpty()) return null;
-    File amrFile = new File(RECORD_SAVE_PATH, UUID.randomUUID().toString() + ".amr");
+    // File amrFile = new File(RECORD_SAVE_PATH, UUID.randomUUID().toString() + ".amr");
     boolean hasError = false;
     FileOutputStream fos = null;
     RandomAccessFile ra = null;
