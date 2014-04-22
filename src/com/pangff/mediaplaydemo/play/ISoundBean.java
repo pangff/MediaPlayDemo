@@ -1,8 +1,10 @@
 package com.pangff.mediaplaydemo.play;
 
+import android.os.Parcelable;
 
 
-public interface ISoundBean {
+
+public interface ISoundBean extends Parcelable{
 
   public abstract int getTimelen();
 

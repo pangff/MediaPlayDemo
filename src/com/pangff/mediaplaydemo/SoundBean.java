@@ -1,5 +1,7 @@
 package com.pangff.mediaplaydemo;
 
+import android.os.Parcel;
+
 import com.pangff.mediaplaydemo.play.ISoundBean;
 import com.pangff.mediaplaydemo.play.RootPojo;
 
@@ -37,6 +39,17 @@ public class SoundBean extends RootPojo implements ISoundBean  {
 
   public void setDiskCache(boolean isDiskCache) {
     this.isDiskCache = isDiskCache;
+  }
+
+  @Override
+  public int describeContents() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    
   }
 
 }

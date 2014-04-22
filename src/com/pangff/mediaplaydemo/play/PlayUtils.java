@@ -4,8 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Intent;
 import android.os.AsyncTask.Status;
 
+import com.pangff.mediaplaydemo.BaseApplication;
 import com.pangff.mediaplaydemo.play.AppDownloadTask.DownloadProgressListener;
 import com.pangff.mediaplaydemo.play.IPlayVoiceProgressListener.VoiceProgressChangedEvent;
 
@@ -117,7 +119,6 @@ public class PlayUtils {
         if (event.voiceId.equals(getCurrentId())) {
           if(event.state == PlaySate.STATE_DOWNLOAD_START){
             if(playStateListener!=null){
-              playStateListener.onStartDownload(event.soundBean);
             }
           }
           if(event.state == PlaySate.STATE_DOWNLOAD_ON){
@@ -138,9 +139,15 @@ public class PlayUtils {
             playNext();
           }
           if(event.state == PlaySate.STATE_PLAY_RELEASE){
-            
+            Intent intent = new Intent();
+            intent.setAction(PlaySate.ACTION_PLAY_RELEASE);
+            BaseApplication.self.sendBroadcast(intent);
           }
           if(event.state == PlaySate.STATE_PLAY_START){
+            Intent intent = new Intent();
+            intent.putExtra("url",event.soundBean.getUrl());
+            intent.setAction(PlaySate.ACTION_PLAY_START);
+            BaseApplication.self.sendBroadcast(intent);
             if(playStateListener!=null){
               playStateListener.onStartPlay(event.soundBean);
             }
@@ -169,6 +176,9 @@ public class PlayUtils {
     }else{
       //发通知播放完毕
       releasPlayer();
+      Intent intent = new Intent();
+      intent.setAction(PlaySate.ACTION_PLAY_FINISHED);
+      BaseApplication.self.sendBroadcast(intent);
       if(playStateListener!=null){
         playStateListener.onFinishAllPlay();
       }
