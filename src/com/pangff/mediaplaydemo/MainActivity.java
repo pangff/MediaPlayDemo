@@ -54,12 +54,10 @@ public class MainActivity extends Activity {//implements PlayStateListener
     state = (TextView) findViewById(R.id.state);
    
     //PlayUtils.getInstance().setPlayStateListener(this);
-    for(int i=0;i<2;i++){
+    for(int i=0;i<1;i++){
       SoundBean soundBean = new SoundBean();
       if(i==0){
-        soundBean.setUrl("http://fm111.img.xiaonei.com/tribe/20070613/10/52/A314269027058MUS.mp3");
-      }else{
-        soundBean.setUrl("http://xdong.0943.com.cn/music/%E6%97%A0%E6%B3%AA%E7%9A%84%E9%81%97%E6%86%BE.mp3");
+        soundBean.setUrl("http://lgyinterface.witmob.com/send2.amr");
       }
       dataList.add(soundBean);
       PlayUtils.getInstance().addSound(soundBean);
