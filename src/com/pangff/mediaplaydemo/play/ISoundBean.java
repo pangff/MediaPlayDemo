@@ -5,6 +5,10 @@ import android.os.Parcelable;
 
 
 public interface ISoundBean extends Parcelable{
+  
+  public abstract boolean isVoice();
+  
+  public abstract String getText();
 
   public abstract int getTimelen();
 

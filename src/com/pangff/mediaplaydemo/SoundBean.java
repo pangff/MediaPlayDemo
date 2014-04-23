@@ -12,6 +12,26 @@ public class SoundBean extends RootPojo implements ISoundBean  {
   private int timelen;//语音时长
   private String url;//语音地址
   private boolean isDiskCache = false;
+  private boolean isVoice;
+  private String text;
+  
+  
+
+  public String getText() {
+    return text;
+  }
+
+  public void setText(String text) {
+    this.text = text;
+  }
+
+  public boolean isVoice() {
+    return isVoice;
+  }
+
+  public void setVoice(boolean isVoice) {
+    this.isVoice = isVoice;
+  }
 
   @Override
   public int getTimelen() {
