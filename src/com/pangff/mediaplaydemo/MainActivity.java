@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.iflytek.cloud.speech.SpeechError;
 import com.iflytek.cloud.speech.SpeechListener;
 import com.iflytek.cloud.speech.SpeechUser;
+import com.pangff.mediaplaydemo.play.ISoundBean;
 import com.pangff.mediaplaydemo.play.PlaySate;
 import com.pangff.mediaplaydemo.play.PlayUtils;
 import com.pangff.mediaplaydemo.play.ToastUtil;
@@ -31,10 +32,24 @@ public class MainActivity extends Activity {// implements PlayStateListener
     @Override
     public void onReceive(Context context, Intent intent) {
       if (intent.getAction().equals(PlaySate.ACTION_PLAY_START)) {
-        ToastUtil.show("播放开始URL:" + intent.getStringExtra("url"));
+        ISoundBean sound = ((ISoundBean)intent.getSerializableExtra("soundBean"));
+        if(sound!=null){
+          if(sound.isVoice()){
+            ToastUtil.show("播放开始:" +(sound.getUrl()));
+          }else{
+            ToastUtil.show("播放开始:" +(sound.getText()));
+          }
+        }
       }
       if (intent.getAction().equals(PlaySate.ACTION_PLAY_FINISHED)) {
-        ToastUtil.show("播放结束");
+        ISoundBean sound = ((ISoundBean)intent.getSerializableExtra("soundBean"));
+        if(sound!=null){
+          if(sound.isVoice()){
+            ToastUtil.show("播放结束:" +(sound.getUrl()));
+          }else{
+            ToastUtil.show("播放结束:" +(sound.getText()));
+          }
+        }
       }
       if (intent.getAction().equals(PlaySate.ACTION_PLAY_RELEASE)) {
         ToastUtil.show("资源释放");
@@ -63,7 +78,7 @@ public class MainActivity extends Activity {// implements PlayStateListener
       SoundBean soundBean = new SoundBean();
       if (i == 0) {
         soundBean.setVoice(false);
-        soundBean.setText("你好,哈哈哈");
+        soundBean.setText("你好,哈哈哈,你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈");
       }
       if (i == 1) {
         soundBean.setVoice(true);

@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.AsyncTask.Status;
+import android.util.Log;
 
 import com.iflytek.cloud.speech.SpeechConstant;
 import com.iflytek.cloud.speech.SpeechError;
@@ -166,7 +167,7 @@ public class PlayUtils implements SynthesizerListener {
           }
           if (event.state == PlaySate.STATE_PLAY_START) {
             Intent intent = new Intent();
-            intent.putExtra("url", event.soundBean.getUrl());
+            intent.putExtra("soundBean", event.soundBean);
             intent.setAction(PlaySate.ACTION_PLAY_START);
             BaseApplication.self.sendBroadcast(intent);
             if (playStateListener != null) {
@@ -188,6 +189,11 @@ public class PlayUtils implements SynthesizerListener {
    * 播放下一个
    */
   private void playNext() {
+    Intent intent = new Intent();
+    intent.setAction(PlaySate.ACTION_PLAY_FINISHED);
+    intent.putExtra("soundBean", getCurrentSound());
+    BaseApplication.self.sendBroadcast(intent);
+    
     if (currentVoicePosition + 1 < soundBeanList.size()) {
       currentVoicePosition++;
       startVoice(soundBeanList.get(currentVoicePosition));
@@ -197,9 +203,6 @@ public class PlayUtils implements SynthesizerListener {
     } else {
       // 发通知播放完毕
       releasPlayer();
-      Intent intent = new Intent();
-      intent.setAction(PlaySate.ACTION_PLAY_FINISHED);
-      BaseApplication.self.sendBroadcast(intent);
       if (playStateListener != null) {
         playStateListener.onFinishAllPlay();
       }
@@ -280,6 +283,7 @@ public class PlayUtils implements SynthesizerListener {
     }
     // 进行语音合成.
     mSpeechSynthesizer.startSpeaking(source, this);
+    
   }
 
   private void startRelVoice(final ISoundBean sound) {
@@ -437,13 +441,10 @@ public class PlayUtils implements SynthesizerListener {
 
   @Override
   public void onSpeakBegin() {
-    VoiceProgressChangedEvent event = new VoiceProgressChangedEvent();
-    event.voiceId = getCurrentId();
-    event.playing = false;
-    event.progess = 0;
-    event.soundBean = getCurrentSound();
-    event.state = PlaySate.STATE_DOWNLOAD_START;
-    voicePlayUtil.voiceChangedPublisher.notifyDataChanged(event);
+    Intent intent = new Intent();
+    intent.putExtra("soundBean", getCurrentSound());
+    intent.setAction(PlaySate.ACTION_PLAY_START);
+    BaseApplication.self.sendBroadcast(intent);
   }
 
 

@@ -1,10 +1,10 @@
 package com.pangff.mediaplaydemo.play;
 
-import android.os.Parcelable;
+import java.io.Serializable;
 
 
 
-public interface ISoundBean extends Parcelable{
+public interface ISoundBean extends Serializable{
   
   public abstract boolean isVoice();
   
@@ -17,7 +17,7 @@ public interface ISoundBean extends Parcelable{
   public abstract String getUrl();
 
   public abstract void setUrl(String url);
-
+  public abstract String getId();
   
   public abstract boolean isDiskCache();
 }
