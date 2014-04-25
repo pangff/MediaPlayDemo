@@ -84,23 +84,31 @@ public class AudioUtils {
     }
     return true;
   }
+  
+  
+  public static File getPrefixVoice(){
+    File prefixVoice = new File(PhoneUtils.getVoicePrefixOnSDPath("send.arm"));
+    if(prefixVoice.exists()){
+      return prefixVoice;
+    }else{
+      if(writeVoicePrefixToSdcard(PhoneUtils.getVoicePrefixOnSDPath("send.arm"))){
+        return prefixVoice;
+      }
+    }
+    return prefixVoice;
+  }
 
   /**
    * 合并AMR文件
-   * 
    * @param tempAmrFiles
    * @return
    */
   public static File buildAmrFile(File tempFile, File amrFile) {
     List<File> tempAmrFiles = new ArrayList<File>();
     
-    File prefixVoice = new File(PhoneUtils.getVoicePrefixOnSDPath("send.arm"));
-    if(prefixVoice.exists()){
+    File prefixVoice = getPrefixVoice();
+    if(prefixVoice!=null && prefixVoice.exists()){
       tempAmrFiles.add(prefixVoice);
-    }else{
-      if(writeVoicePrefixToSdcard(PhoneUtils.getVoicePrefixOnSDPath("send.arm"))){
-        tempAmrFiles.add(prefixVoice);
-      }
     }
     tempAmrFiles.add(tempFile);
 

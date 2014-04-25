@@ -78,7 +78,7 @@ public class MainActivity extends Activity {// implements PlayStateListener
       SoundBean soundBean = new SoundBean();
       if (i == 0) {
         soundBean.setVoice(false);
-        soundBean.setText("你好,哈哈哈,你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈你好,哈哈哈");
+        soundBean.setText("达到阿呆发的撒阿地方大大大大大大大大大刚刚改革改革打法的司法大使发电厂的f恶法达到阿呆发的撒阿地方大大大大大大大大大");
       }
       if (i == 1) {
         soundBean.setVoice(true);
@@ -106,12 +106,23 @@ public class MainActivity extends Activity {// implements PlayStateListener
   @Override
   protected void onDestroy() {
     Log.e("dd", "销毁");
-    PlayUtils.getInstance().releasPlayer();
-    unregisterReceiver(broadcastReceiver);
+    releasePlayer();
     super.onDestroy();
   }
   
-
+  @Override
+  public void onBackPressed() {
+    releasePlayer();
+    super.onBackPressed();
+  }
+  
+  private void releasePlayer(){
+    if(broadcastReceiver!=null){
+      PlayUtils.getInstance().releasPlayer();
+      unregisterReceiver(broadcastReceiver);
+      broadcastReceiver = null;
+    }
+  }
 
   /**
    * 用户登录回调监听器.

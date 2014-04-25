@@ -1,6 +1,7 @@
 package com.pangff.mediaplaydemo.play;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +43,6 @@ public class PlayUtils implements SynthesizerListener {
     this.playStateListener = playStateListener;
   }
 
-
   public static PlayUtils getInstance() {
     if (playUtils == null) {
       playUtils = new PlayUtils();
@@ -63,6 +63,7 @@ public class PlayUtils implements SynthesizerListener {
    * @param soundBean
    */
   public void addSound(ISoundBean soundBean) {
+    playedPrefix = false;
     soundBeanList.add(soundBean);
     if (currentVoicePosition == -1 || voicePlayUtil.mediaPlay==null|| !voicePlayUtil.mediaPlay.isPlaying()) {
       currentVoicePosition = 0;
@@ -277,13 +278,48 @@ public class PlayUtils implements SynthesizerListener {
     // 设置语调
     mSpeechSynthesizer.setParameter(SpeechConstant.PITCH, "" + pitch);
     // 获取合成文本.
-    String source = null;
+    
+    final String source;
     if (null != sound.getText()) {
       source = sound.getText().toString();
+    }else{
+      source = null;
     }
     // 进行语音合成.
-    mSpeechSynthesizer.startSpeaking(source, this);
+  
     
+   
+    
+    mSpeechSynthesizer.startSpeaking(source, PlayUtils.this);
+   
+  }
+  
+  /**
+   * 播放前缀
+   */
+  boolean  playedPrefix;
+  private void playPrefixVoice(){
+    if(!playedPrefix){
+      if (voicePlayUtil.mediaPlay == null) {
+        voicePlayUtil.createMediaPlayer();
+      }
+      voicePlayUtil.mediaPlay.reset();
+      try {
+        voicePlayUtil.mediaPlay.setDataSource(AudioUtils.getPrefixVoice().getAbsolutePath());
+        voicePlayUtil.mediaPlay.prepare();
+        voicePlayUtil.mediaPlay.start();
+      } catch (IllegalArgumentException e) {
+        e.printStackTrace();
+      } catch (SecurityException e) {
+        e.printStackTrace();
+      } catch (IllegalStateException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }finally{
+        playedPrefix = true;
+      }
+    }
   }
 
   private void startRelVoice(final ISoundBean sound) {
@@ -429,22 +465,33 @@ public class PlayUtils implements SynthesizerListener {
 
   @Override
   public void onBufferProgress(int arg0, int arg1, int arg2, String arg3) {
-
   }
 
 
   @Override
   public void onCompleted(SpeechError arg0) {
-    playNext();
+    if(playedPrefix){
+      playedPrefix = false;
+      playNext();
+    }
   }
 
 
   @Override
   public void onSpeakBegin() {
+    mSpeechSynthesizer.pauseSpeaking();
+    playPrefixVoice();
     Intent intent = new Intent();
     intent.putExtra("soundBean", getCurrentSound());
     intent.setAction(PlaySate.ACTION_PLAY_START);
     BaseApplication.self.sendBroadcast(intent);
+    BaseApplication.self.handlerCommon.postDelayed(new Runnable() {
+      
+      @Override
+      public void run() {
+        mSpeechSynthesizer.resumeSpeaking();
+      }
+    }, 800);
   }
 
 
@@ -456,7 +503,6 @@ public class PlayUtils implements SynthesizerListener {
 
   @Override
   public void onSpeakProgress(int arg0, int arg1, int arg2) {
-
   }
 
 
