@@ -186,7 +186,7 @@ public class AppDownloadTask extends AsyncTask<AppDownloadRequest, Integer, Inte
             return USER_CANCEL;
           } else {
             // 重命名临时文件
-            AudioUtils.buildAmrFile(tmpFile,appFile);
+            AudioUtils.buildAmrFile(tmpFile,appFile,request.isPrefixVoice);
             //tmpFile.renameTo(appFile);
             return OK;
           }
@@ -197,7 +197,7 @@ public class AppDownloadTask extends AsyncTask<AppDownloadRequest, Integer, Inte
       } else if (statusCode == 416) { // 下载数据完成
         // 重命名临时文件
         //tmpFile.renameTo(appFile);
-        AudioUtils.buildAmrFile(tmpFile,appFile);
+        AudioUtils.buildAmrFile(tmpFile,appFile,request.isPrefixVoice);
         publisher.notifyDataChanged(new DownloadProgressEvent(PROGRESS, request));
         return OK;
       }

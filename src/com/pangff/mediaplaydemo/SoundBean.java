@@ -13,7 +13,7 @@ public class SoundBean extends RootPojo implements ISoundBean  {
   private boolean isVoice;
   private String text;
   private String id;
-  
+  private boolean hasPrefixVoice;
 
   public String getId() {
     return id;
@@ -67,6 +67,12 @@ public class SoundBean extends RootPojo implements ISoundBean  {
     this.isDiskCache = isDiskCache;
   }
 
-  
+  public boolean isHasPrefixVoice() {
+    return hasPrefixVoice;
+  }
+
+  public void setHasPrefixVoice(boolean hasPrefixVoice) {
+    this.hasPrefixVoice = hasPrefixVoice;
+  }
 
 }

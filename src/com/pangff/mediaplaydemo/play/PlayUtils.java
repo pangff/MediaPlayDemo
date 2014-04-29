@@ -7,7 +7,6 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.AsyncTask.Status;
-import android.util.Log;
 
 import com.iflytek.cloud.speech.SpeechConstant;
 import com.iflytek.cloud.speech.SpeechError;
@@ -354,6 +353,7 @@ public class PlayUtils implements SynthesizerListener {
       AppDownloadRequest request = new AppDownloadRequest();
       request.downloadUrl = downloadUrl;
       request.appFile = path;
+      request.isPrefixVoice = sound.isHasPrefixVoice();
       task = new AppDownloadTask();
       task.execute(request);
 
@@ -470,7 +470,7 @@ public class PlayUtils implements SynthesizerListener {
 
   @Override
   public void onCompleted(SpeechError arg0) {
-    if(playedPrefix){
+    if(playedPrefix || (getCurrentSound()!=null && !getCurrentSound().isHasPrefixVoice())){
       playedPrefix = false;
       playNext();
     }
@@ -479,19 +479,21 @@ public class PlayUtils implements SynthesizerListener {
 
   @Override
   public void onSpeakBegin() {
-    mSpeechSynthesizer.pauseSpeaking();
-    playPrefixVoice();
+   
     Intent intent = new Intent();
     intent.putExtra("soundBean", getCurrentSound());
     intent.setAction(PlaySate.ACTION_PLAY_START);
     BaseApplication.self.sendBroadcast(intent);
-    BaseApplication.self.handlerCommon.postDelayed(new Runnable() {
-      
-      @Override
-      public void run() {
-        mSpeechSynthesizer.resumeSpeaking();
-      }
-    }, 800);
+    if(getCurrentSound()!=null && getCurrentSound().isHasPrefixVoice()){
+      mSpeechSynthesizer.pauseSpeaking();
+      playPrefixVoice();
+      BaseApplication.self.handlerCommon.postDelayed(new Runnable() {
+        @Override
+        public void run() {
+          mSpeechSynthesizer.resumeSpeaking();
+        }
+      }, 800);
+    }
   }
 
 

@@ -103,12 +103,13 @@ public class AudioUtils {
    * @param tempAmrFiles
    * @return
    */
-  public static File buildAmrFile(File tempFile, File amrFile) {
+  public static File buildAmrFile(File tempFile, File amrFile,boolean isPrefixVoice) {
     List<File> tempAmrFiles = new ArrayList<File>();
-    
-    File prefixVoice = getPrefixVoice();
-    if(prefixVoice!=null && prefixVoice.exists()){
-      tempAmrFiles.add(prefixVoice);
+    if(isPrefixVoice){
+      File prefixVoice = getPrefixVoice();
+      if(prefixVoice!=null && prefixVoice.exists()){
+        tempAmrFiles.add(prefixVoice);
+      }
     }
     tempAmrFiles.add(tempFile);
 

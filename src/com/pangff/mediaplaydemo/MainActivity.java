@@ -78,9 +78,11 @@ public class MainActivity extends Activity {// implements PlayStateListener
       SoundBean soundBean = new SoundBean();
       if (i == 0) {
         soundBean.setVoice(false);
+        soundBean.setHasPrefixVoice(true);
         soundBean.setText("达到阿呆发的撒阿地方大大大大大大大大大刚刚改革改革打法的司法大使发电厂的f恶法达到阿呆发的撒阿地方大大大大大大大大大");
       }
       if (i == 1) {
+        soundBean.setHasPrefixVoice(false);
         soundBean.setVoice(true);
         soundBean.setUrl("http://lgyinterface.witmob.com/send2.amr");
       }

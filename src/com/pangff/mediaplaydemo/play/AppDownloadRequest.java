@@ -28,4 +28,9 @@ public class AppDownloadRequest {
    * 当前的下载速度
    */
   public float speed = 0f;
+  
+  /**
+   * 是否拼接前缀语音
+   */
+  public boolean isPrefixVoice;
 }

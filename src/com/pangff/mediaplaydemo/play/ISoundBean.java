@@ -20,4 +20,6 @@ public interface ISoundBean extends Serializable{
   public abstract String getId();
   
   public abstract boolean isDiskCache();
+  
+  public abstract boolean isHasPrefixVoice();
 }
