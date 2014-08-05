@@ -29,8 +29,4 @@ public class AppDownloadRequest {
    */
   public float speed = 0f;
   
-  /**
-   * 是否拼接前缀语音
-   */
-  public boolean isPrefixVoice;
 }
